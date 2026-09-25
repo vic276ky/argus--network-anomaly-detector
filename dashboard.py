@@ -59,7 +59,7 @@ def update(frame):
         for spine in ax.spines.values():
             spine.set_color('#00ff99')
 
-    # Plot 1 - Top IPs by packet count
+    # Top IPs by packet count
     ax1 = axes[0, 0]
     if ip_packet_count:
         top_ips = sorted(ip_packet_count.items(), key=lambda x: x[1], reverse=True)[:5]
@@ -69,7 +69,7 @@ def update(frame):
         ax1.set_title('Top 5 IPs by Traffic', color='#00ff99')
         ax1.set_xlabel('Packet Count', color='#00ff99')
 
-    # Plot 2 - Protocol distribution
+    # Protocol distribution
     ax2 = axes[0, 1]
     if protocol_count:
         labels = list(protocol_count.keys())
@@ -79,7 +79,7 @@ def update(frame):
                 textprops={'color': '#00ff99'}, autopct='%1.1f%%')
         ax2.set_title('Protocol Distribution', color='#00ff99')
 
-    # Plot 3 - Packet rate over time
+    # Packet rate over time
     ax3 = axes[1, 0]
     timestamps.append(datetime.datetime.now().strftime("%H:%M:%S"))
     packet_rates.append(packet_count_total)
@@ -92,7 +92,7 @@ def update(frame):
     ax3.set_ylabel('Packets', color='#00ff99')
     plt.setp(ax3.xaxis.get_majorticklabels(), rotation=45, ha='right')
 
-    # Plot 4 - Warnings
+    # Warnings
     ax4 = axes[1, 1]
     ax4.set_title('Warnings', color='#ff0000')
     ax4.axis('off')

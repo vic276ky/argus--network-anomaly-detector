@@ -8,12 +8,10 @@ import matplotlib.animation as animation
 import geoip2.database
 
 
-# ─── Configuration ─────────────────────────────────────────
+# Configuration 
 PACKET_THRESHOLD = 50
 PORT_SCAN_THRESHOLD = 10
 ABUSEIPDB_API_KEY = "1ed76d3b1f6b4c5b8499b2a32998bd8b6fb8bf10d2ff4535ecb6d29b59bddf43fa83d6f34b6d9981"
-
-# ─── Data Stores ───────────────────────────────────────────
 ip_packet_count = defaultdict(int)
 port_scan_tracker = defaultdict(set)
 protocol_count = defaultdict(int)
@@ -24,7 +22,7 @@ packet_count_total = 0
 warnings = []
 checked_ips = set()
 
-# ─── Log File ──────────────────────────────────────────────
+# Log File
 log_file = open("alerts.log", "a", encoding="utf-8")
 
 def log(message):
@@ -34,7 +32,7 @@ def log(message):
     log_file.write(full_message + "\n")
     log_file.flush()
 
-# ─── GeoIP Setup ───────────────────────────────────────────
+# GeoIP Setup
 try:
     geo_reader = geoip2.database.Reader('GeoLite2-City.mmdb')
     GEO_ENABLED = True
@@ -57,7 +55,7 @@ def get_location(ip):
     except Exception:
         return "Unknown"
 
-# ─── Blacklist Check ───────────────────────────────────────
+# Blacklist Check
 def check_blacklist(ip):
     if not ip:
         return
@@ -97,7 +95,7 @@ def check_blacklist(ip):
     except Exception:
         pass
 
-# ─── Packet Handler ────────────────────────────────────────
+# Packet Handler 
 def detect_anomaly(packet):
     global packet_count_total
 
@@ -185,7 +183,7 @@ def detect_anomaly(packet):
         dst_location = get_location(dst_ip)
         log(f"[{proto}] {src_ip} ({src_location}) -> {dst_ip} ({dst_location}) : Port {dst_port}")
 
-# ─── Dashboard Setup ───────────────────────────────────────
+# Dashboard Setup
 fig, axes = plt.subplots(2, 2, figsize=(14, 8))
 fig.patch.set_facecolor('#0a0a0a')
 fig.suptitle('ARGUS - Network Anomaly Detector', color='#00ff99', fontsize=16, fontweight='bold')
@@ -204,7 +202,7 @@ def update(frame):
         for spine in ax.spines.values():
             spine.set_color('#00ff99')
 
-    # Plot 1 - Top IPs
+    # Top IPs
     ax1 = axes[0, 0]
     if ip_packet_count:
         top_ips = sorted(ip_packet_count.items(), key=lambda x: x[1], reverse=True)[:5]
@@ -214,7 +212,7 @@ def update(frame):
         ax1.set_title('Top 5 IPs by Traffic', color='#00ff99')
         ax1.set_xlabel('Packet Count', color='#00ff99')
 
-    # Plot 2 - Top Countries
+    # Top Countries
     ax2 = axes[0, 1]
     if country_count:
         top_countries = sorted(country_count.items(), key=lambda x: x[1], reverse=True)[:5]
@@ -228,7 +226,7 @@ def update(frame):
         ax2.text(0.3, 0.5, 'Collecting data...', color='#00ff99',
                 transform=ax2.transAxes)
 
-    # Plot 3 - Packet rate over time
+    # Packet rate over time
     ax3 = axes[1, 0]
     timestamps.append(datetime.datetime.now().strftime("%H:%M:%S"))
     packet_rates.append(packet_count_total)
@@ -241,7 +239,7 @@ def update(frame):
     ax3.set_ylabel('Packets', color='#00ff99')
     plt.setp(ax3.xaxis.get_majorticklabels(), rotation=45, ha='right')
 
-    # Plot 4 - Warnings
+    # Warnings
     ax4 = axes[1, 1]
     ax4.set_title('Warnings', color='#ff0000')
     ax4.axis('off')
@@ -258,14 +256,14 @@ def update(frame):
 
     plt.tight_layout()
 
-# ─── Start Sniffer Thread ──────────────────────────────────
+# Start Sniffer Thread
 sniff_thread = threading.Thread(
     target=lambda: sniff(prn=detect_anomaly, store=0, filter="ip or udp port 53")
 )
 sniff_thread.daemon = True
 sniff_thread.start()
 
-# ─── Start ─────────────────────────────────────────────────
+# Start 
 log(">>> ARGUS - Network Anomaly Detector Started")
 log("-" * 60)
 
